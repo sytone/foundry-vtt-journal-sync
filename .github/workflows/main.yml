@@ -1,0 +1,57 @@
+on:
+  push:
+    # Sequence of patterns matched against refs/tags
+    tags:
+      - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
+
+name: Create Release
+
+jobs:
+  build:
+    name: Create Release
+    runs-on: ubuntu-latest
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          body: Foundry VTT Journal Sync Release ${{ github.ref }}|
+          draft: false
+          prerelease: false
+        
+      - name: Zip Release
+        uses: TheDoctor0/zip-release@v0.3.0
+        with:
+          # Filename for archive
+          filename: release.zip
+          # Base path for archive files
+          path: .
+          # Working directory before zipping
+          directory: .
+          # List of excluded files/directories
+          exclusions: .vscode
+        
+
+      - name: Upload a Release Asset
+        uses: actions/upload-release-asset@v1.0.2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}        
+        with:
+          # The URL for uploading assets to the release
+          upload_url: ${{ steps.create_release.outputs.upload_url }} 
+          # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, 
+          # which include a `upload_url`. See this blog post for more info: 
+          # https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+          # The path to the asset you want to upload
+          asset_path: ./release.zip
+          # The name of the asset you want to upload
+          asset_name: release.zip
+          # The content-type of the asset you want to upload. See the supported Media Types here: https://www.iana.org/assignments/media-types/media-types.xhtml for more information
+          asset_content_type: application/zip
