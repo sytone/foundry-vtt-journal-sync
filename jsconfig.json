@@ -1,0 +1,10 @@
+{
+    "compilerOptions": {
+        "target": "es6"
+    },
+    "include": [
+       "./**/*",
+       "../../systems/dnd5e/**/*",
+       "../../scripts/foundry.js"
+    ]
+ }

@@ -1,0 +1,7 @@
+{
+    "journal-sync.Settings.Title": "Journal Sync settings",
+    
+    "journal-sync.MarkdownSourcePath.Name": "Markdown Source Path",
+    "journal-sync.MarkdownSourcePath.Hint": "The path to the markdown files under the Foundry Data folder, it is 'journal-sync' by default"
+
+}
