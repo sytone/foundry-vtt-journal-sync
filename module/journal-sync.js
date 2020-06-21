@@ -4,6 +4,7 @@ import * as Logger from './logger.js'
 import * as FS from './journalFileSystem.js'
 
 let markdownSourcePath;
+let newImportedFiles = "";
 
 export let fetchParams = (silent = false) => {
     markdownSourcePath = game.settings.get(Constants.MODULE_NAME, "MarkdownSourcePath");
@@ -61,7 +62,7 @@ export function readyModule() {
 
                 console.log(game.journal);
                 game.journal.forEach((value, key, map) => {
-                    console.log(`m[${key}] = ${value.data.name} - ${value.data.folder} - ${value.data.content}`);
+                    Logger.log(`m[${key}] = ${value.data.name} - ${value.data.folder} - ${value.data.content}`);
                 });
                 return false;
                 break;
@@ -76,8 +77,7 @@ export function readyModule() {
                 });
 
                 game.journal.filter(f => (f.data.folder === "")).forEach((value, key, map) => {
-                    console.log(`m[${key}] = ${value.data.name} - ${value.data.folder} - ${value.data.type}`);
-                    console.log(value);
+                    Logger.log(`m[${key}] = ${value.data.name} - ${value.data.folder} - ${value.data.type}`);
                     exportJournal(value, validmarkdownSourcePath());
                 });
 
@@ -87,15 +87,21 @@ export function readyModule() {
             case "import": // /js import
 
                 FS.browse("data", validmarkdownSourcePath()).then((result) => {
-                    console.log(result);
                     result.files.forEach(file => {
                         importFile(file);
                     });
                     result.dirs.forEach(folder => {
                         importFolder(folder, validmarkdownSourcePath());
                     });
-                    
+                    // if(newImportedFiles === "") {
+                    //     return false;
+                    // } else {
+                    //     data.content = `WARNING: If you have added new files to be imported please run export and delete the orginal files otherwise they will be duplicated. All files should have the ID in brackets at the end. <br />Newly Imported Files:<br />${newImportedFiles}`;
+                    //     return true;
+                    // }
                 });
+
+
 
                 return false;
                 break;
@@ -107,7 +113,22 @@ export function readyModule() {
         }
     });
 }
-export function last(array) {
+
+const generateJournalFileName = (journalEntity) => {
+    return `${journalEntity.name} (${journalEntity.id}).md`
+}
+
+const getJournalIdFromFilename = (fileName) => {
+    // 'sdfkjs dflksjd kljf skldjf(IDIDIDIID).md
+    return last(fileName.split('(')).replace(').md','');
+}
+
+const getJournalTitleFromFilename = (fileName) => {
+    // 'sdfkjs dflksjd kljf skldjf(IDIDIDIID).md
+    return fileName.replace(`(${getJournalIdFromFilename(fileName)}).md`, '');
+}
+
+const last = (array) => {
     return array[array.length - 1];
 }
 
@@ -126,21 +147,27 @@ const importFolder = (folder, parentFolder) => {
 
 const importFile = (file, parentPath) => {
 
-    var journalPath = decodeURIComponent(file).replace(validmarkdownSourcePath(), '').replace('.md','');
-    var journalName = last(journalPath.split('/'));
+    var journalPath = decodeURIComponent(file).replace(validmarkdownSourcePath(), '')
+    var journalId = getJournalIdFromFilename(journalPath);
+    var journalName = getJournalTitleFromFilename(last(journalPath.split('/')));
+
+    
     fetch('/' + file).then(response => {
         response.text().then(journalContents => {
             let updated = false;
             var converter = new showdown.Converter()
-            let md = converter.makeHtml(journalContents);                 
-            game.journal.filter(f => (f.name === journalName)).forEach((value, key, map) => {
-                                
+            let md = converter.makeHtml(journalContents);  
+
+            game.journal.filter(f => (f.id === journalId)).forEach((value, key, map) => {
+                Logger.log(`Importing ${journalPath} with ID ${journalId} named ${journalName}`);
                  value.update({content: md});
                  updated = true;
-            //     exportJournal(value, validmarkdownSourcePath());
             });
             if(!updated) {
-                JournalEntry.create({name: journalName, content: md, folder: undefined})
+                Logger.log(`Creating ${journalPath} with ID ${journalId} named ${journalName}`);
+                journalName = last(journalPath.split('/')).replace('.md','');
+                JournalEntry.create({name: journalName, content: md, folder: undefined}).then(journal => {journal.show();});
+                ChatMessage.create({content: `Added ${journalName}, please run export and delete '${journalName}.md'`});
             }
             
         });
@@ -149,25 +176,27 @@ const importFile = (file, parentPath) => {
 }
 
 const exportFolder = (folder, parentPath) => {
-    console.log(folder);
     let folderPath = parentPath + '/' + folder.data.name;
-
 
     // Create folder directory on server. 
     FS.createDirectory("data", folderPath)
         .then((result) => {
             Logger.log(`Creating ${folderPath}`);
+            folder.content.forEach(journalEntry => {
+                exportJournal(journalEntry, folderPath);
+            });
         })
         .catch((error) => {
             if (!error.includes("EEXIST")) {
                 Logger.log(error);
             } else {
                 Logger.log(`${folderPath} exists`);
+                folder.content.forEach(journalEntry => {
+                    exportJournal(journalEntry, folderPath);
+                });
             }
         });
-    folder.content.forEach(journalEntry => {
-        exportJournal(journalEntry, folderPath);
-    });
+
 
     // Recurse for any sub folders. 
     folder.children.forEach(folderEntity => {
@@ -179,43 +208,15 @@ const exportJournal = (journalEntry, parentPath) => {
     // Export any journals in the folder.
     var converter = new showdown.Converter()
     let md = converter.makeMarkdown(journalEntry.data.content).split('\r\n');
+    let journalFileName = generateJournalFileName(journalEntry);
 
-    FS.upload("data", parentPath, new File(md, journalEntry.name + ".md"), { bucket: null })
+    FS.upload("data", parentPath, new File(md, journalFileName), { bucket: null })
         .then((result) => {
-            Logger.log(`Uploading ${parentPath}/${journalEntry.name}.md`);
+            Logger.log(`Uploading ${parentPath}/${journalFileName}`);
         })
         .catch((error) => {
             Logger.log(error);
         });
-}
-
-const updateFolderChildren = (folder, parentPath) => {
-    var converter = new showdown.Converter()
-    folder.children.forEach(folderEntity => {
-        let folderPath = parentPath + '/' + folderEntity.data.name;
-        FS.createDirectory("data", folderPath)
-            .then((result) => {
-                Logger.log(`Creating ${folderPath}`);
-            })
-            .catch((error) => {
-                if (!error.includes("EEXIST")) {
-                    Logger.log(error);
-                }
-            });
-
-        folderEntity.content.forEach(journalEntry => {
-            let md = converter.makeMarkdown(journalEntry.data.content).split('\r\n');
-
-            FS.upload("data", folderPath, new File(md, journalEntry.name + ".md"), { bucket: null })
-                .then((result) => {
-                    Logger.log(`Uploading ${folderPath}/${journalEntry.name}.md`);
-                })
-                .catch((error) => {
-                    Logger.log(error);
-                });
-        });
-        updateFolderChildren(folderEntity, folderPath)
-    });
 }
 
 const createFolderTree = dataset => {
