@@ -16,6 +16,9 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         WITH_V: true
         
+    - name: Set selected color
+      run: echo 'Soooo ${{ steps.bump.outputs.new_tag }} is?'
+        
     - name: Zip Release
       uses: TheDoctor0/zip-release@v0.3.0
       with:
