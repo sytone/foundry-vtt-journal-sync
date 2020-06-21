@@ -15,3 +15,34 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         WITH_V: true
+        
+    - name: Zip Release
+      uses: TheDoctor0/zip-release@v0.3.0
+      with:
+        # Filename for archive
+        filename: release.zip
+        # Base path for archive files
+        path: .
+        # Working directory before zipping
+        directory: .
+        # List of excluded files/directories
+        exclusions: .vscode
+        
+
+    - name: Upload a Release Asset
+      uses: actions/upload-release-asset@v1.0.2
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}        
+      with:
+        # The URL for uploading assets to the release
+        upload_url: 'https://uploads.github.com/repos/sytone/foundry-vtt-journal-sync/releases/${{ steps.github-tag-action.outputs.new_tag }}'
+        # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, 
+        # which include a `upload_url`. See this blog post for more info: 
+        # https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+        # The path to the asset you want to upload
+        asset_path: ./release.zip
+        # The name of the asset you want to upload
+        asset_name: release.zip
+        # The content-type of the asset you want to upload. See the supported Media Types here: https://www.iana.org/assignments/media-types/media-types.xhtml for more information
+        asset_content_type: application/zip
+          
