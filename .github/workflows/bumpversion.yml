@@ -10,7 +10,7 @@ jobs:
     - uses: actions/checkout@master
       with:
         fetch-depth: '0'
-    - name: Bump version and push tag
+    - name: bump
       uses: anothrNick/github-tag-action@1.17.2
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -19,15 +19,8 @@ jobs:
     - name: Zip Release
       uses: TheDoctor0/zip-release@v0.3.0
       with:
-        # Filename for archive
         filename: release.zip
-        # Base path for archive files
-        path: .
-        # Working directory before zipping
-        directory: .
-        # List of excluded files/directories
-        exclusions: .vscode
-        
+        exclusions: '*.git* /*node_modules/* .editorconfig *.vscode*'
 
     - name: Upload a Release Asset
       uses: actions/upload-release-asset@v1.0.2
@@ -35,7 +28,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}        
       with:
         # The URL for uploading assets to the release
-        upload_url: 'https://uploads.github.com/repos/sytone/foundry-vtt-journal-sync/releases/${{ steps.github-tag-action.outputs.new_tag }}'
+        upload_url: 'https://uploads.github.com/repos/sytone/foundry-vtt-journal-sync/releases/${{ steps.bump.outputs.new_tag }}'
         # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, 
         # which include a `upload_url`. See this blog post for more info: 
         # https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
