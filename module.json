@@ -18,7 +18,7 @@
   "styles": [],
   "packs": [],
   "url": "https://github.com/sytone/foundry-vtt-journal-sync",
-  "manifest": "https://github.com/sytone/foundry-vtt-journal-sync/.../module.json",
+  "manifest": "https://raw.githubusercontent.com/sytone/foundry-vtt-journal-sync/master/module.json",
   "download": "https://github.com/sytone/foundry-vtt-journal-sync/.../foundry-vtt-journal-sync.zip",
   "socket": true
 }
