@@ -6,26 +6,23 @@ import * as FS from './journalFileSystem.js'
 let markdownSourcePath;
 let newImportedFiles = "";
 
-export let fetchParams = (silent = false) => {
+export async function fetchParams(silent = false) {
     markdownSourcePath = game.settings.get(Constants.MODULE_NAME, "MarkdownSourcePath");
 }
 
-export function initModule() {
+export async function initModule() {
     Logger.log("Init Module entered")
-    fetchParams(true);
+    //Logger.enableTracing();
+    await fetchParams(true);
 
 }
 
-function validmarkdownSourcePath() {
-    let validMarkdownSourcePath = markdownSourcePath.replace("\\", "/");
-    validMarkdownSourcePath += validMarkdownSourcePath.endsWith("/") ? "" : "/";
-    validMarkdownSourcePath += game.world.name + "/";
-    return validMarkdownSourcePath;
-}
-
-export function readyModule() {
+export async function readyModule() {
     Logger.log("Ready Module entered")
-    fetchParams();
+    await fetchParams();
+
+    Logger.log(`markdownSourcePath: ${markdownSourcePath}`)
+    Logger.log(`validmarkdownSourcePath(): ${await validmarkdownSourcePath()}`)
 
     // Create markdownSourcePath if not already there.
     let buildPath = '';
@@ -42,7 +39,7 @@ export function readyModule() {
             });
     });
 
-    Hooks.on("preCreateChatMessage", (data, options, userId) => {
+    Hooks.on("preCreateChatMessage", async (data, options, userId) => {
         if (data.content === undefined || data.content.length == 0) return;
         let content = data.content || "";
         if (!content.trim().startsWith("/js")) return;
@@ -70,7 +67,7 @@ export function readyModule() {
 
             case "export": // /js export
 
-                let journalFolders = createFolderTree(game.folders.filter(f => (f.data.type === "JournalEntry") && f.displayed))
+                let journalFolders = await createFolderTree(game.folders.filter(f => (f.data.type === "JournalEntry") && f.displayed))
 
                 journalFolders.forEach(folderEntity => {
                     exportFolder(folderEntity, validmarkdownSourcePath());
@@ -85,25 +82,33 @@ export function readyModule() {
                 break;
 
             case "import": // /js import
-
-                FS.browse("data", validmarkdownSourcePath()).then((result) => {
-                    result.files.forEach(file => {
-                        importFile(file);
-                    });
-                    result.dirs.forEach(folder => {
-                        importFolder(folder, validmarkdownSourcePath());
-                    });
-                    // if(newImportedFiles === "") {
-                    //     return false;
-                    // } else {
-                    //     data.content = `WARNING: If you have added new files to be imported please run export and delete the orginal files otherwise they will be duplicated. All files should have the ID in brackets at the end. <br />Newly Imported Files:<br />${newImportedFiles}`;
-                    //     return true;
-                    // }
-                });
+                await createJournalFolders(validmarkdownSourcePath(), null);
+                let result = await FS.browse("data", validmarkdownSourcePath());
+                for (let [key, file] of Object.entries(result.files)) {
+                    await importFile(file);
+                }
+                for (let [key, folder] of Object.entries(result.dirs)) {
+                    await importFolder(folder);
+                }
+                // FS.browse("data", validmarkdownSourcePath()).then((result) => {
+                //     console.log(result);
+                //     result.files.forEach(file => {
+                //         importFile(file);
+                //     });
+                //     result.dirs.forEach(folder => {
+                //         importFolder(folder);
+                //     });
+                // });
 
 
 
                 return false;
+                break;
+            case "nukejournals":
+                game.journal.forEach((value, key, map) => { JournalEntry.delete(value.id); });
+                break;
+            case "nukefolders":
+                game.journal.forEach((value, key, map) => { JournalEntry.delete(value.id); });
                 break;
 
             default:
@@ -114,68 +119,113 @@ export function readyModule() {
     });
 }
 
-const generateJournalFileName = (journalEntity) => {
+function validmarkdownSourcePath() {
+    let validMarkdownSourcePath = markdownSourcePath.replace("\\", "/");
+    validMarkdownSourcePath += validMarkdownSourcePath.endsWith("/") ? "" : "/";
+    validMarkdownSourcePath += game.world.name + "/";
+    return validMarkdownSourcePath;
+}
+
+function generateJournalFileName(journalEntity) {
     return `${journalEntity.name} (${journalEntity.id}).md`
 }
 
-const getJournalIdFromFilename = (fileName) => {
+function getJournalIdFromFilename(fileName) {
     // 'sdfkjs dflksjd kljf skldjf(IDIDIDIID).md
-    return last(fileName.split('(')).replace(').md','');
+    return last(fileName.split('(')).replace(').md', '');
 }
 
-const getJournalTitleFromFilename = (fileName) => {
+function getJournalTitleFromFilename(fileName) {
     // 'sdfkjs dflksjd kljf skldjf(IDIDIDIID).md
     return fileName.replace(`(${getJournalIdFromFilename(fileName)}).md`, '');
 }
 
-const last = (array) => {
+function last(array) {
     return array[array.length - 1];
 }
 
-const importFolder = (folder, parentFolder) => {
+async function importFolder(importFolderPath) {
+    Logger.logTrace(`Importing folder: ${importFolderPath}`);
+    let result = await FS.browse("data", importFolderPath);
 
-    FS.browse("data", folder).then((result) => {
-        result.files.forEach(file => {
-            importFile(file);
-        });
-        result.dirs.forEach(folder => {
-            importFolder(folder, validmarkdownSourcePath());
-        });
-    });    
+    for (let [key, file] of Object.entries(result.files)) {
+        await importFile(file);
+    }
 
+    for (let [key, folder] of Object.entries(result.dirs)) {
+        await importFolder(folder);
+    }
 }
 
-const importFile = (file, parentPath) => {
+// This will create the journal folder in FVTT
+async function createJournalFolders(rootPath, parentFolderId) {
+    //Logger.logTrace(`createJournalFolders | Params(folder = ${rootPath} parent = ${parentFolderId})`)
+    let result = await FS.browse("data", rootPath)
+    for (let [key, folder] of Object.entries(result.dirs)) {
+        let thisFolderName = last(decodeURIComponent(folder).split('/'));
+        let folderDetails = game.folders.filter(f => (f.data.type === "JournalEntry") && (f.data.name === thisFolderName) && (f.data.parent === parentFolderId));
 
-    var journalPath = decodeURIComponent(file).replace(validmarkdownSourcePath(), '')
-    var journalId = getJournalIdFromFilename(journalPath);
-    var journalName = getJournalTitleFromFilename(last(journalPath.split('/')));
+        if (folderDetails.length == 0) {
+            //Logger.logTrace(`createJournalFolders | Creating folder path: ${thisFolderName} parent: ${parentFolderId}`)
+            //Logger.logTrace(`${JSON.stringify({ name: thisFolderName, type: "JournalEntry", parent: parentFolderId })}`);
+            await Folder.create({ name: thisFolderName, type: "JournalEntry", parent: parentFolderId });
+        }
 
-    
+        folderDetails = game.folders.filter(f => (f.data.type === "JournalEntry") && (f.data.name === thisFolderName) && (f.data.parent === parentFolderId));
+        //Logger.logTrace(`createJournalFolders | folder: ${folder} thisFolderName: ${thisFolderName} folderDetails._id: ${folderDetails[0]._id} folderDetails: ${JSON.stringify(folderDetails)}`)
+
+        createJournalFolders(folder, folderDetails[0]._id);
+    }
+}
+
+async function importFile(file) {
+    Logger.logTrace(`importFile | params(file = ${file})`);
+    var journalPath = decodeURIComponent(file).replace(validmarkdownSourcePath(), '').trim();
+    var journalId = getJournalIdFromFilename(journalPath).trim();
+    var journalName = getJournalTitleFromFilename(last(journalPath.split('/'))).trim();
+    var parentPath = journalPath.replace(last(journalPath.split('/')), '').trim();
+
+    let currentParent = null;
+
+    if (parentPath != '') {
+        let pathArray = parentPath.split('/');
+        for (let index = 0; index < pathArray.length; index++) {
+
+            const path = pathArray[index];
+            if (path != '') {
+                let folder = game.folders.filter(f => (f.data.type === "JournalEntry") && (f.data.name === path) && (f.data.parent === currentParent));
+                currentParent = folder[0]._id;
+                Logger.logTrace(`currentParent: '${currentParent}' path: '${path}' folder: '${JSON.stringify(folder)}' (${folder[0]._id}) '${typeof folder}' '${folder.length}'`);
+            }
+        }
+    }
+
+    Logger.logTrace(`'${file}','${journalPath}','${journalId}','${journalName}','${parentPath}','${currentParent}'`);
+
     fetch('/' + file).then(response => {
         response.text().then(journalContents => {
             let updated = false;
             var converter = new showdown.Converter()
-            let md = converter.makeHtml(journalContents);  
+            let md = converter.makeHtml(journalContents);
 
             game.journal.filter(f => (f.id === journalId)).forEach((value, key, map) => {
                 Logger.log(`Importing ${journalPath} with ID ${journalId} named ${journalName}`);
-                 value.update({content: md});
-                 updated = true;
+                value.update({ content: md });
+                updated = true;
             });
-            if(!updated) {
+
+            if (!updated) {
                 Logger.log(`Creating ${journalPath} with ID ${journalId} named ${journalName}`);
-                journalName = last(journalPath.split('/')).replace('.md','');
-                JournalEntry.create({name: journalName, content: md, folder: undefined}).then(journal => {journal.show();});
-                ChatMessage.create({content: `Added ${journalName}, please run export and delete '${journalName}.md'`});
+                JournalEntry.create({ name: journalName, content: md, folder: currentParent }).then(journal => { journal.show(); });
+                ChatMessage.create({ content: `Added ${journalName}, please run export and delete '${journalName}.md'` });
             }
-            
+
         });
-        
+
     });
 }
 
-const exportFolder = (folder, parentPath) => {
+async function exportFolder(folder, parentPath) {
     let folderPath = parentPath + '/' + folder.data.name;
 
     // Create folder directory on server. 
@@ -204,7 +254,7 @@ const exportFolder = (folder, parentPath) => {
     });
 }
 
-const exportJournal = (journalEntry, parentPath) => {
+async function exportJournal(journalEntry, parentPath) {
     // Export any journals in the folder.
     var converter = new showdown.Converter()
     let md = converter.makeMarkdown(journalEntry.data.content).split('\r\n');
@@ -219,7 +269,7 @@ const exportJournal = (journalEntry, parentPath) => {
         });
 }
 
-const createFolderTree = dataset => {
+async function createFolderTree(dataset) {
     let hashTable = Object.create(null);
     let dataTree = [];
     dataset.forEach(folderEntity => hashTable[folderEntity.id] = { ...folderEntity, childNodes: [] });

@@ -19,19 +19,19 @@ Hooks.once('init', async function () {
     // Assign custom classes and constants here
 
     // Register custom module settings
-    registerSettings();
+    await registerSettings();
 
     // // Preload Handlebars templates
     // await preloadTemplates();
 
-    JournalSync.initModule();
+    await JournalSync.initModule();
     // Register custom sheets (if any)
 });
 
 /* ------------------------------------ */
 /* Setup module							*/
 /* ------------------------------------ */
-Hooks.once('setup', function () {
+Hooks.once('setup', async function () {
     // Do anything after initialization but before
     // ready
 });
@@ -39,9 +39,9 @@ Hooks.once('setup', function () {
 /* ------------------------------------ */
 /* When ready							*/
 /* ------------------------------------ */
-Hooks.once('ready', function () {
+Hooks.once('ready', async function () {
     // Do anything once the module is ready
-    JournalSync.readyModule();
+    await JournalSync.readyModule();
 });
 
 // Add any additional hooks if necessary

@@ -41,7 +41,7 @@ const settings = [
   }
 ]
 
-export const registerSettings = () => {
+export async function registerSettings() {
   settings.forEach(setting => {
     let options = {
       name: game.i18n.localize(`${Constants.MODULE_NAME}.${setting.name}.Name`),
