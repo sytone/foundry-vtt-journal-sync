@@ -1,0 +1,45 @@
+name: journal-sync CI
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    
+    # Create a zip file with all files required by the module to add to the release
+    - run: zip -r ./journal-sync.zip module.json main.js lang/ module/ scripts/
+    
+    # Run the script that returns the version from `module.json`
+    - name: Get Version                                   
+      shell: bash
+      id: get-version
+      run: echo "::set-output name=version::$(node ./.github/workflows/get-version.js)"    
+    
+    # Create an additional release for this version
+    - name: Create Release                                
+      id: create_versioned_release
+      uses: ncipollo/release-action@v1
+      with:
+        allowUpdates: true
+        name: Release ${{ steps.get-version.outputs.version }} # Use the version in the name
+        draft: false
+        prerelease: false
+        token: ${{ secrets.GITHUB_TOKEN }}
+        artifacts: './module.json,./journal-sync.zip'
+        tag: ${{ steps.get-version.outputs.version }} # Use the version as the tag
+    
+    # Update the 'latest' release
+    - name: Create Release
+      id: create_latest_release
+      uses: ncipollo/release-action@v1
+      if: endsWith(github.ref, 'master') # Only update the latest release when pushing to the master branch
+      with:
+        allowUpdates: true
+        name: Latest
+        draft: false
+        prerelease: false
+        token: ${{ secrets.GITHUB_TOKEN }}
+        artifacts: './module.json,./journal-sync.zip'
+        tag: latest
