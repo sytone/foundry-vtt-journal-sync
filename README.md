@@ -1,5 +1,8 @@
 # Foundry VTT Journal Sync
 
+
+![journal-sync-downloads](https://img.shields.io/github/downloads-pre/sytone/foundry-vtt-journal-sync/latest/journal-sync.zip)
+
 This module will allow you to export and import Journal entries to the server and store them as markdown files.
 
 To export enter `/js export` in the chat. To import enter `/js import`
