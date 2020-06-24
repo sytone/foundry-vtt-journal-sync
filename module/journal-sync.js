@@ -205,7 +205,7 @@ async function importFile(file) {
     fetch('/' + file).then(response => {
         response.text().then(journalContents => {
             let updated = false;
-            var converter = new showdown.Converter()
+            var converter = new showdown.Converter({tables: true, strikethrough: true})
             let md = converter.makeHtml(journalContents);
 
             game.journal.filter(f => (f.id === journalId)).forEach((value, key, map) => {
@@ -256,7 +256,7 @@ async function exportFolder(folder, parentPath) {
 
 async function exportJournal(journalEntry, parentPath) {
     // Export any journals in the folder.
-    var converter = new showdown.Converter()
+    var converter = new showdown.Converter({tables: true, strikethrough: true})
     let md = converter.makeMarkdown(journalEntry.data.content).split('\r\n');
     let journalFileName = generateJournalFileName(journalEntry);
 

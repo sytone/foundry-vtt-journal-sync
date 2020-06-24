@@ -67,7 +67,7 @@ export let upload = async (source, path, file, options) => {
         ui.notifications.error(response.error);
         return false;
     } else if (response.message) {
-        ui.notifications.info(response.message);
+        // ui.notifications.info(response.message);
     }
     return response;
 }
