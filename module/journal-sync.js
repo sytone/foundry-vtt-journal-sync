@@ -66,42 +66,12 @@ export async function readyModule() {
 
 
             case "export": // /js export
-
-                let journalFolders = await createFolderTree(game.folders.filter(f => (f.data.type === "JournalEntry") && f.displayed))
-
-                journalFolders.forEach(folderEntity => {
-                    exportFolder(folderEntity, validmarkdownSourcePath());
-                });
-
-                game.journal.filter(f => (f.data.folder === "")).forEach((value, key, map) => {
-                    Logger.log(`m[${key}] = ${value.data.name} - ${value.data.folder} - ${value.data.type}`);
-                    exportJournal(value, validmarkdownSourcePath());
-                });
-
+                await startExport();
                 return false;
                 break;
 
             case "import": // /js import
-                await createJournalFolders(validmarkdownSourcePath(), null);
-                let result = await FS.browse("data", validmarkdownSourcePath());
-                for (let [key, file] of Object.entries(result.files)) {
-                    await importFile(file);
-                }
-                for (let [key, folder] of Object.entries(result.dirs)) {
-                    await importFolder(folder);
-                }
-                // FS.browse("data", validmarkdownSourcePath()).then((result) => {
-                //     console.log(result);
-                //     result.files.forEach(file => {
-                //         importFile(file);
-                //     });
-                //     result.dirs.forEach(folder => {
-                //         importFolder(folder);
-                //     });
-                // });
-
-
-
+                await startImport();
                 return false;
                 break;
             case "nukejournals":
@@ -117,7 +87,70 @@ export async function readyModule() {
                 break;
         }
     });
+
+
+
+    Hooks.on("getSceneControlButtons", (controls) => {
+        let group = controls.find(b => b.name == "notes")
+        group.tools.push({
+            name: "import",
+            title: "Import Journals",
+            icon: "fas fa-file-import",
+            onClick: () => {
+                startImport();
+            },
+            button: true
+        });
+        group.tools.push({
+            name: "export",
+            title: "Export Journals",
+            icon: "fas fa-file-export",
+            onClick: () => {
+                startExport();
+            },
+            button: true,
+        });
+    });
+
 }
+
+
+async function startImport() {
+    await createJournalFolders(validmarkdownSourcePath(), null);
+    let result = await FS.browse("data", validmarkdownSourcePath());
+    for (let [key, file] of Object.entries(result.files)) {
+        await importFile(file);
+    }
+    for (let [key, folder] of Object.entries(result.dirs)) {
+        await importFolder(folder);
+    }
+
+    ui.notifications.info("Import completed");
+    // FS.browse("data", validmarkdownSourcePath()).then((result) => {
+    //     console.log(result);
+    //     result.files.forEach(file => {
+    //         importFile(file);
+    //     });
+    //     result.dirs.forEach(folder => {
+    //         importFolder(folder);
+    //     });
+    // });
+}
+
+async function startExport() {
+    let journalFolders = await createFolderTree(game.folders.filter(f => (f.data.type === "JournalEntry") && f.displayed))
+
+    journalFolders.forEach(folderEntity => {
+        exportFolder(folderEntity, validmarkdownSourcePath());
+    });
+
+    game.journal.filter(f => (f.data.folder === "")).forEach((value, key, map) => {
+        Logger.log(`m[${key}] = ${value.data.name} - ${value.data.folder} - ${value.data.type}`);
+        exportJournal(value, validmarkdownSourcePath());
+    });
+    ui.notifications.info("Export completed");
+}
+
 
 function validmarkdownSourcePath() {
     let validMarkdownSourcePath = markdownSourcePath.replace("\\", "/");
@@ -205,7 +238,7 @@ async function importFile(file) {
     fetch('/' + file).then(response => {
         response.text().then(journalContents => {
             let updated = false;
-            var converter = new showdown.Converter({tables: true, strikethrough: true})
+            var converter = new showdown.Converter({ tables: true, strikethrough: true })
             let md = converter.makeHtml(journalContents);
 
             game.journal.filter(f => (f.id === journalId)).forEach((value, key, map) => {
@@ -256,7 +289,7 @@ async function exportFolder(folder, parentPath) {
 
 async function exportJournal(journalEntry, parentPath) {
     // Export any journals in the folder.
-    var converter = new showdown.Converter({tables: true, strikethrough: true})
+    var converter = new showdown.Converter({ tables: true, strikethrough: true })
     let md = converter.makeMarkdown(journalEntry.data.content).split('\r\n');
     let journalFileName = generateJournalFileName(journalEntry);
 
