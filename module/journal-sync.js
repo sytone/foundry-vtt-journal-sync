@@ -3,18 +3,22 @@ import * as Constants from "./constants.js"
 import * as Logger from './logger.js'
 import * as FS from './journalFileSystem.js'
 
-let markdownSourcePath;
+let markdownSourcePath, journalEditorLink;
+let enableTracing = false;
 let newImportedFiles = "";
 
 export async function fetchParams(silent = false) {
     markdownSourcePath = game.settings.get(Constants.MODULE_NAME, "MarkdownSourcePath");
+    journalEditorLink = game.settings.get(Constants.MODULE_NAME, "JournalEditorLink");
+    enableTracing = game.settings.get(Constants.MODULE_NAME, "EnableTracing");
 }
 
 export async function initModule() {
     Logger.log("Init Module entered")
-    //Logger.enableTracing();
     await fetchParams(true);
-
+    if(enableTracing) {
+        Logger.enableTracing();
+    }
 }
 
 export async function readyModule() {
@@ -110,6 +114,18 @@ export async function readyModule() {
             },
             button: true,
         });
+
+        if(journalEditorLink != "") {
+            group.tools.push({
+                name: "edit",
+                title: "Edit Journals",
+                icon: "fas fa-edit",
+                onClick: () => {
+                    window.open(journalEditorLink, "_blank");
+                },
+                button: true,
+            });            
+        }
     });
 
 }

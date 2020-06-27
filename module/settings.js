@@ -38,6 +38,20 @@ const settings = [
     default: "journal-sync/",
     type: String,
     onChange: fetchParams
+  },
+  {
+    name: "JournalEditorLink",
+    scope: "world",
+    default: "",
+    type: String,
+    onChange: fetchParams
+  },
+  {
+    name: "EnableTracing",
+    scope: "world",
+    default: false,
+    type: Boolean,
+    onChange: fetchParams
   }
 ]
 
