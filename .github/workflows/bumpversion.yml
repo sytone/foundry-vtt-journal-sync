@@ -27,7 +27,7 @@ jobs:
         draft: false
         prerelease: false
         token: ${{ secrets.GITHUB_TOKEN }}
-        artifacts: './module.json,./journal-sync.zip'
+        artifacts: './CHANGELOG.md,./module.json,./journal-sync.zip'
         tag: ${{ steps.get-version.outputs.version }} # Use the version as the tag
     
     # Update the 'latest' release
@@ -41,5 +41,5 @@ jobs:
         draft: false
         prerelease: false
         token: ${{ secrets.GITHUB_TOKEN }}
-        artifacts: './module.json,./journal-sync.zip'
+        artifacts: './CHANGELOG.md,./module.json,./journal-sync.zip'
         tag: latest
