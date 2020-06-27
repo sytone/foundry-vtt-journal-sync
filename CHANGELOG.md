@@ -6,6 +6,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2020-06-27
+### Added
+- Ability to link to editing UI
+- Buttons in UI to import and export
+- Cleaned up UI messages to be less
+- Added ability to turn tracing on for the console log
+
 ## [0.2.1] - 2020-06-24
 ### Added
 - Github action to automatically publish the module.
