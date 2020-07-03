@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2020-07-02
+### Added
+- Option to skip folders and Journals that have special formatting and are not actually journal entries.
+- Resolved issues with Forien's Quest Log and formatting. #1
+
 ## [0.3.0] - 2020-06-27
 ### Added
 - Ability to link to editing UI
@@ -32,7 +37,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Created simple module to import and export Journal Entries to the file system and used Markdown as the format. 
 - Created import and export commands for chat window.
 
-[Unreleased]: https://github.com/sytone/foundry-vtt-journal-sync/releases/tag/0.2.1...HEAD
+[Unreleased]: https://github.com/sytone/foundry-vtt-journal-sync/releases/tag/0.4.0...HEAD
+[0.4.0]: https://github.com/sytone/foundry-vtt-journal-sync/compare/0.3.0...0.4.0
+[0.3.0]: https://github.com/sytone/foundry-vtt-journal-sync/compare/0.2.1...0.3.0
 [0.2.1]: https://github.com/sytone/foundry-vtt-journal-sync/compare/0.2.0...0.2.1
 [0.2.0]: https://github.com/olivierlacan/keep-a-changelog/compare/v0.2.0...0.2.0
 [0.2.0]: https://github.com/olivierlacan/keep-a-changelog/compare/v0.1.4...v0.2.0
