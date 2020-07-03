@@ -6,6 +6,9 @@
     "journal-sync.JournalEditorLink.Name": "Journal Editor Link",
     "journal-sync.JournalEditorLink.Hint": "Link to the editor you use to update the Journal Markdown. For example a hosted VSCode instance",
     "journal-sync.EnableTracing.Name": "Enable Tracing",
-    "journal-sync.EnableTracing.Hint": "Increases the logging to the browser console for debugging"
-    
+    "journal-sync.EnableTracing.Hint": "Increases the logging to the browser console for debugging",
+    "journal-sync.SkipJournalFolders.Name": "Skip Journal Folder Import/Export",
+    "journal-sync.SkipJournalFolders.Hint": "List folders you do not want to import/export. Comma delimited.",
+    "journal-sync.SkipJournalEntries.Name": "Skip Journal Entry Import/Export",
+    "journal-sync.SkipJournalEntries.Hint": "List Journal entries you do not want to import/export. Comma delimited."
 }

@@ -52,7 +52,22 @@ const settings = [
     default: false,
     type: Boolean,
     onChange: fetchParams
+  },
+  {
+    name: "SkipJournalFolders",
+    scope: "world",
+    default: "_fql_quests",
+    type: String,
+    onChange: fetchParams
+  },
+  {
+    name: "SkipJournalEntries",
+    scope: "world",
+    default: "",
+    type: String,
+    onChange: fetchParams
   }
+  
 ]
 
 export async function registerSettings() {

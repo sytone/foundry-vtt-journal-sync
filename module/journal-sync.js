@@ -6,17 +6,21 @@ import * as FS from './journalFileSystem.js'
 let markdownSourcePath, journalEditorLink;
 let enableTracing = false;
 let newImportedFiles = "";
+let skippedJournalFolders, skippedJournalEntries;
 
 export async function fetchParams(silent = false) {
     markdownSourcePath = game.settings.get(Constants.MODULE_NAME, "MarkdownSourcePath");
     journalEditorLink = game.settings.get(Constants.MODULE_NAME, "JournalEditorLink");
     enableTracing = game.settings.get(Constants.MODULE_NAME, "EnableTracing");
+
+    skippedJournalFolders = game.settings.get(Constants.MODULE_NAME, "SkipJournalFolders").split(',');
+    skippedJournalEntries = game.settings.get(Constants.MODULE_NAME, "SkipJournalEntries").split(',');
 }
 
 export async function initModule() {
     Logger.log("Init Module entered")
     await fetchParams(true);
-    if(enableTracing) {
+    if (enableTracing) {
         Logger.enableTracing();
     }
 }
@@ -26,11 +30,11 @@ export async function readyModule() {
     await fetchParams();
 
     Logger.log(`markdownSourcePath: ${markdownSourcePath}`)
-    Logger.log(`validmarkdownSourcePath(): ${await validmarkdownSourcePath()}`)
+    Logger.log(`validMarkdownSourcePath(): ${await validMarkdownSourcePath()}`)
 
     // Create markdownSourcePath if not already there.
     let buildPath = '';
-    validmarkdownSourcePath().split('/').forEach((path) => {
+    validMarkdownSourcePath().split('/').forEach((path) => {
         buildPath += path + '/';
         FS.createDirectory("data", buildPath)
             .then((result) => {
@@ -57,7 +61,7 @@ export async function readyModule() {
                 break;
 
             case "test": // /js test
-                FS.browse("data", validmarkdownSourcePath()).then((result) => {
+                FS.browse("data", validMarkdownSourcePath()).then((result) => {
                     // ChatMessage.create({content: JSON.stringify(result)});
                 });
 
@@ -68,7 +72,6 @@ export async function readyModule() {
                 return false;
                 break;
 
-
             case "export": // /js export
                 await startExport();
                 return false;
@@ -78,9 +81,11 @@ export async function readyModule() {
                 await startImport();
                 return false;
                 break;
+
             case "nukejournals":
                 game.journal.forEach((value, key, map) => { JournalEntry.delete(value.id); });
                 break;
+
             case "nukefolders":
                 game.journal.forEach((value, key, map) => { JournalEntry.delete(value.id); });
                 break;
@@ -91,8 +96,6 @@ export async function readyModule() {
                 break;
         }
     });
-
-
 
     Hooks.on("getSceneControlButtons", (controls) => {
         let group = controls.find(b => b.name == "notes")
@@ -115,7 +118,7 @@ export async function readyModule() {
             button: true,
         });
 
-        if(journalEditorLink != "") {
+        if (journalEditorLink != "") {
             group.tools.push({
                 name: "edit",
                 title: "Edit Journals",
@@ -124,16 +127,14 @@ export async function readyModule() {
                     window.open(journalEditorLink, "_blank");
                 },
                 button: true,
-            });            
+            });
         }
     });
-
 }
 
-
 async function startImport() {
-    await createJournalFolders(validmarkdownSourcePath(), null);
-    let result = await FS.browse("data", validmarkdownSourcePath());
+    await createJournalFolders(validMarkdownSourcePath(), null);
+    let result = await FS.browse("data", validMarkdownSourcePath());
     for (let [key, file] of Object.entries(result.files)) {
         await importFile(file);
     }
@@ -142,7 +143,7 @@ async function startImport() {
     }
 
     ui.notifications.info("Import completed");
-    // FS.browse("data", validmarkdownSourcePath()).then((result) => {
+    // FS.browse("data", validMarkdownSourcePath()).then((result) => {
     //     console.log(result);
     //     result.files.forEach(file => {
     //         importFile(file);
@@ -157,18 +158,17 @@ async function startExport() {
     let journalFolders = await createFolderTree(game.folders.filter(f => (f.data.type === "JournalEntry") && f.displayed))
 
     journalFolders.forEach(folderEntity => {
-        exportFolder(folderEntity, validmarkdownSourcePath());
+        exportFolder(folderEntity, validMarkdownSourcePath());
     });
 
     game.journal.filter(f => (f.data.folder === "")).forEach((value, key, map) => {
-        Logger.log(`m[${key}] = ${value.data.name} - ${value.data.folder} - ${value.data.type}`);
-        exportJournal(value, validmarkdownSourcePath());
+        Logger.logTrace(`m[${key}] = ${value.data.name} - ${value.data.folder} - ${value.data.type}`);
+        exportJournal(value, validMarkdownSourcePath());
     });
     ui.notifications.info("Export completed");
 }
 
-
-function validmarkdownSourcePath() {
+function validMarkdownSourcePath() {
     let validMarkdownSourcePath = markdownSourcePath.replace("\\", "/");
     validMarkdownSourcePath += validMarkdownSourcePath.endsWith("/") ? "" : "/";
     validMarkdownSourcePath += game.world.name + "/";
@@ -208,20 +208,20 @@ async function importFolder(importFolderPath) {
 
 // This will create the journal folder in FVTT
 async function createJournalFolders(rootPath, parentFolderId) {
-    //Logger.logTrace(`createJournalFolders | Params(folder = ${rootPath} parent = ${parentFolderId})`)
+    Logger.logTrace(`createJournalFolders | Params(folder = ${rootPath} parent = ${parentFolderId})`)
     let result = await FS.browse("data", rootPath)
     for (let [key, folder] of Object.entries(result.dirs)) {
         let thisFolderName = last(decodeURIComponent(folder).split('/'));
         let folderDetails = game.folders.filter(f => (f.data.type === "JournalEntry") && (f.data.name === thisFolderName) && (f.data.parent === parentFolderId));
 
         if (folderDetails.length == 0) {
-            //Logger.logTrace(`createJournalFolders | Creating folder path: ${thisFolderName} parent: ${parentFolderId}`)
-            //Logger.logTrace(`${JSON.stringify({ name: thisFolderName, type: "JournalEntry", parent: parentFolderId })}`);
+            Logger.logTrace(`createJournalFolders | Creating folder path: ${thisFolderName} parent: ${parentFolderId}`)
+            Logger.logTrace(`${JSON.stringify({ name: thisFolderName, type: "JournalEntry", parent: parentFolderId })}`);
             await Folder.create({ name: thisFolderName, type: "JournalEntry", parent: parentFolderId });
         }
 
         folderDetails = game.folders.filter(f => (f.data.type === "JournalEntry") && (f.data.name === thisFolderName) && (f.data.parent === parentFolderId));
-        //Logger.logTrace(`createJournalFolders | folder: ${folder} thisFolderName: ${thisFolderName} folderDetails._id: ${folderDetails[0]._id} folderDetails: ${JSON.stringify(folderDetails)}`)
+        Logger.logTrace(`createJournalFolders | folder: ${folder} thisFolderName: ${thisFolderName} folderDetails._id: ${folderDetails[0]._id} folderDetails: ${JSON.stringify(folderDetails)}`)
 
         createJournalFolders(folder, folderDetails[0]._id);
     }
@@ -229,10 +229,14 @@ async function createJournalFolders(rootPath, parentFolderId) {
 
 async function importFile(file) {
     Logger.logTrace(`importFile | params(file = ${file})`);
-    var journalPath = decodeURIComponent(file).replace(validmarkdownSourcePath(), '').trim();
+    var journalPath = decodeURIComponent(file).replace(validMarkdownSourcePath(), '').trim();
     var journalId = getJournalIdFromFilename(journalPath).trim();
     var journalName = getJournalTitleFromFilename(last(journalPath.split('/'))).trim();
     var parentPath = journalPath.replace(last(journalPath.split('/')), '').trim();
+    
+    if( skippedJournalEntries.includes(journalName) || skippedJournalFolders.includes(last(journalPath.split('/'))) ) {
+        return;
+    }
 
     let currentParent = null;
 
@@ -304,6 +308,10 @@ async function exportFolder(folder, parentPath) {
 }
 
 async function exportJournal(journalEntry, parentPath) {
+    if( skippedJournalEntries.includes(journalName) || skippedJournalFolders.includes(last(parentPath.split('/'))) ) {
+        return;
+    }
+
     // Export any journals in the folder.
     var converter = new showdown.Converter({ tables: true, strikethrough: true })
     let md = converter.makeMarkdown(journalEntry.data.content).split('\r\n');
