@@ -308,7 +308,7 @@ async function exportFolder(folder, parentPath) {
 }
 
 async function exportJournal(journalEntry, parentPath) {
-    if( skippedJournalEntries.includes(journalName) || skippedJournalFolders.includes(last(parentPath.split('/'))) ) {
+    if( skippedJournalEntries.includes(journalEntry.name) || skippedJournalFolders.includes(last(parentPath.split('/'))) ) {
         return;
     }
 

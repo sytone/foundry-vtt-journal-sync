@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.1] - 2020-07-02
+### Fixed
+- Name of Journal when exporting was not correct.
+
 ## [0.4.0] - 2020-07-02
 ### Added
 - Option to skip folders and Journals that have special formatting and are not actually journal entries.
@@ -37,7 +41,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Created simple module to import and export Journal Entries to the file system and used Markdown as the format. 
 - Created import and export commands for chat window.
 
-[Unreleased]: https://github.com/sytone/foundry-vtt-journal-sync/releases/tag/0.4.0...HEAD
+[Unreleased]: https://github.com/sytone/foundry-vtt-journal-sync/releases/tag/0.4.1...HEAD
+[0.4.1]: https://github.com/sytone/foundry-vtt-journal-sync/compare/0.4.0...0.4.1
 [0.4.0]: https://github.com/sytone/foundry-vtt-journal-sync/compare/0.3.0...0.4.0
 [0.3.0]: https://github.com/sytone/foundry-vtt-journal-sync/compare/0.2.1...0.3.0
 [0.2.1]: https://github.com/sytone/foundry-vtt-journal-sync/compare/0.2.0...0.2.1
