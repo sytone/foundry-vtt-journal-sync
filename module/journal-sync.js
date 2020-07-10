@@ -15,8 +15,25 @@ export async function fetchParams(silent = false) {
 
     skippedJournalFolders = game.settings.get(Constants.MODULE_NAME, "SkipJournalFolders").split(',');
     skippedJournalEntries = game.settings.get(Constants.MODULE_NAME, "SkipJournalEntries").split(',');
+
+    // If the entries are empty it will set the array to one empty string ""
+    // This matches the root path where the folder name is also 
+    // "" so blocked export/import. If nothing set put a name in that no
+    // one in their right mind would use :)
+    if(skippedJournalFolders.length == 1 && skippedJournalFolders[0] === "") {
+        skippedJournalFolders[0] = "NOTHINGHASBEENSETTOSKIP";
+    }
+    if(skippedJournalEntries.length == 1 && skippedJournalEntries[0] === "") {
+        skippedJournalEntries[0] = "NOTHINGHASBEENSETTOSKIP";
+    }
 }
 
+/**
+ * Runs during the init hook of Foundry
+ *
+ * During init the settings and trace logging is set.
+ *
+ */
 export async function initModule() {
     Logger.log("Init Module entered")
     await fetchParams(true);
@@ -193,6 +210,19 @@ function last(array) {
     return array[array.length - 1];
 }
 
+
+function hasJsonStructure(str) {
+    if (typeof str !== 'string') return false;
+    try {
+        const result = JSON.parse(str);
+        const type = Object.prototype.toString.call(result);
+        return type === '[object Object]'
+            || type === '[object Array]';
+    } catch (err) {
+        return false;
+    }
+}
+
 async function importFolder(importFolderPath) {
     Logger.logTrace(`Importing folder: ${importFolderPath}`);
     let result = await FS.browse("data", importFolderPath);
@@ -233,8 +263,8 @@ async function importFile(file) {
     var journalId = getJournalIdFromFilename(journalPath).trim();
     var journalName = getJournalTitleFromFilename(last(journalPath.split('/'))).trim();
     var parentPath = journalPath.replace(last(journalPath.split('/')), '').trim();
-    
-    if( skippedJournalEntries.includes(journalName) || skippedJournalFolders.includes(last(journalPath.split('/'))) ) {
+
+    if (skippedJournalEntries.includes(journalName) || skippedJournalFolders.includes(last(journalPath.split('/')))) {
         return;
     }
 
@@ -258,8 +288,16 @@ async function importFile(file) {
     fetch('/' + file).then(response => {
         response.text().then(journalContents => {
             let updated = false;
-            var converter = new showdown.Converter({ tables: true, strikethrough: true })
-            let md = converter.makeHtml(journalContents);
+            let md = "";
+
+            // If the contents is pure JSON ignore it as it may be used by 
+            // a module as configuration storage.
+            if (hasJsonStructure(journalContents)) {
+                md = journalContents
+            } else {
+                var converter = new showdown.Converter({ tables: true, strikethrough: true })
+                md = converter.makeHtml(journalContents);
+            }
 
             game.journal.filter(f => (f.id === journalId)).forEach((value, key, map) => {
                 Logger.log(`Importing ${journalPath} with ID ${journalId} named ${journalName}`);
@@ -279,7 +317,7 @@ async function importFile(file) {
 }
 
 async function exportFolder(folder, parentPath) {
-    let folderPath = parentPath + '/' + folder.data.name;
+    let folderPath = (parentPath + '/' + folder.data.name).replace("//", "/").trim();
 
     // Create folder directory on server. 
     FS.createDirectory("data", folderPath)
@@ -308,14 +346,23 @@ async function exportFolder(folder, parentPath) {
 }
 
 async function exportJournal(journalEntry, parentPath) {
-    if( skippedJournalEntries.includes(journalEntry.name) || skippedJournalFolders.includes(last(parentPath.split('/'))) ) {
+    if (skippedJournalEntries.includes(journalEntry.name) || skippedJournalFolders.includes(last(parentPath.split('/')))) {
+        Logger.log(`Skipping ${journalEntry.name} as it matches exclusion rules`)
         return;
     }
 
-    // Export any journals in the folder.
-    var converter = new showdown.Converter({ tables: true, strikethrough: true })
-    let md = converter.makeMarkdown(journalEntry.data.content).split('\r\n');
+    let md = "";
     let journalFileName = generateJournalFileName(journalEntry);
+
+    // If the contents is pure JSON ignore it as it may be used by 
+    // a module as configuration storage.
+    if (hasJsonStructure(journalEntry.data.content)) {
+        Logger.log(`Detected JSON, skipping markdown conversion for '${journalFileName}' located at '${parentPath}'`);
+        md = journalEntry.data.content.split('\r\n');
+    } else {
+        var converter = new showdown.Converter({ tables: true, strikethrough: true });
+        md = converter.makeMarkdown(journalEntry.data.content).split('\r\n');
+    }
 
     FS.upload("data", parentPath, new File(md, journalFileName), { bucket: null })
         .then((result) => {

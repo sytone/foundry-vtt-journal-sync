@@ -1,4 +1,5 @@
 # Changelog
+
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
@@ -6,42 +7,46 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.4.1] - 2020-07-02
-### Fixed
-- Name of Journal when exporting was not correct.
+## [0.5.0] - 2020-07-10
+
+- Added: When import / export detects that the content is JSON Markdown / HTML conversion is skipped.
+- Fixed: When skipped folder or name is empty files in root of Journal were not being imported / exported.
+
+## [0.4.1] - 2020-07-10
+
+- Fixed: Name of Journal when exporting was not correct.
 
 ## [0.4.0] - 2020-07-02
-### Added
-- Option to skip folders and Journals that have special formatting and are not actually journal entries.
-- Resolved issues with Forien's Quest Log and formatting. #1
+
+- Added: Option to skip folders and Journals that have special formatting and are not actually journal entries.
+- Added: Resolved issues with Forien's Quest Log and formatting. #1
 
 ## [0.3.0] - 2020-06-27
-### Added
-- Ability to link to editing UI
-- Buttons in UI to import and export
-- Cleaned up UI messages to be less
-- Added ability to turn tracing on for the console log
+
+- Added: Ability to link to editing UI
+- Added: Buttons in UI to import and export
+- Added: Cleaned up UI messages to be less
+- Added: Added ability to turn tracing on for the console log
 
 ## [0.2.1] - 2020-06-24
-### Added
-- Github action to automatically publish the module.
-- CHANGELOG.md to track all the changes.
+
+- Added: Github action to automatically publish the module.
+- Added: CHANGELOG.md to track all the changes.
 
 ## [0.2.0] - 2020-06-21
-### Added
-- Appened the ID of rht e Journal Entry to the filename to allow entries with the same title be updated.
-- Creation of folders in Foundry VTT to match server file system. 
 
-### Fixed
-- Made all functions async to handle calls and race issues
+- Added: Appended the ID of the Journal Entry to the filename to allow entries with the same title be updated.
+- Added: Creation of folders in Foundry VTT to match server file system.
+- Fixed: Made all functions async to handle calls and race issues
 
 ## [0.1.0] - 2015-10-06
-### Added
-- Inital release
-- Created simple module to import and export Journal Entries to the file system and used Markdown as the format. 
-- Created import and export commands for chat window.
 
-[Unreleased]: https://github.com/sytone/foundry-vtt-journal-sync/releases/tag/0.4.1...HEAD
+- Added: Initial release
+- Added: Created simple module to import and export Journal Entries to the file system and used Markdown as the format.
+- Added: Created import and export commands for chat window.
+
+[Unreleased]: https://github.com/sytone/foundry-vtt-journal-sync/releases/tag/0.5.0...HEAD
+[0.5.0]: https://github.com/sytone/foundry-vtt-journal-sync/compare/0.4.1...0.5.0
 [0.4.1]: https://github.com/sytone/foundry-vtt-journal-sync/compare/0.4.0...0.4.1
 [0.4.0]: https://github.com/sytone/foundry-vtt-journal-sync/compare/0.3.0...0.4.0
 [0.3.0]: https://github.com/sytone/foundry-vtt-journal-sync/compare/0.2.1...0.3.0

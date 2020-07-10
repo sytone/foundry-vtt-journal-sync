@@ -56,7 +56,7 @@ const settings = [
   {
     name: "SkipJournalFolders",
     scope: "world",
-    default: "_fql_quests",
+    default: "",
     type: String,
     onChange: fetchParams
   },
