@@ -3,7 +3,7 @@ import * as Constants from "./constants.js"
 import * as Logger from './logger.js'
 import * as FS from './journalFileSystem.js'
 
-let markdownSourcePath, journalEditorLink;
+let markdownSourcePath, journalEditorLink, importWorldPath, exportWorldPath;
 let enableTracing = false;
 let newImportedFiles = "";
 let skippedJournalFolders, skippedJournalEntries;
@@ -12,6 +12,9 @@ export async function fetchParams(silent = false) {
     markdownSourcePath = game.settings.get(Constants.MODULE_NAME, "MarkdownSourcePath");
     journalEditorLink = game.settings.get(Constants.MODULE_NAME, "JournalEditorLink");
     enableTracing = game.settings.get(Constants.MODULE_NAME, "EnableTracing");
+    
+    importWorldPath = game.settings.get(Constants.MODULE_NAME, "ImportWorldPath");
+    exportWorldPath = game.settings.get(Constants.MODULE_NAME, "ExportWorldPath");
 
     skippedJournalFolders = game.settings.get(Constants.MODULE_NAME, "SkipJournalFolders").split(',');
     skippedJournalEntries = game.settings.get(Constants.MODULE_NAME, "SkipJournalEntries").split(',');
@@ -150,8 +153,8 @@ export async function readyModule() {
 }
 
 async function startImport() {
-    await createJournalFolders(validMarkdownSourcePath(), null);
-    let result = await FS.browse("data", validMarkdownSourcePath());
+    await createJournalFolders(validMarkdownSourcePath()+validImportWorldPath(), null);
+    let result = await FS.browse("data", validMarkdownSourcePath()+validImportWorldPath());
     for (let [key, file] of Object.entries(result.files)) {
         await importFile(file);
     }
@@ -175,12 +178,12 @@ async function startExport() {
     let journalFolders = await createFolderTree(game.folders.filter(f => (f.data.type === "JournalEntry") && f.displayed))
 
     journalFolders.forEach(folderEntity => {
-        exportFolder(folderEntity, validMarkdownSourcePath());
+        exportFolder(folderEntity, validMarkdownSourcePath()+validExportWorldPath());
     });
 
     game.journal.filter(f => (f.data.folder === "")).forEach((value, key, map) => {
         Logger.logTrace(`m[${key}] = ${value.data.name} - ${value.data.folder} - ${value.data.type}`);
-        exportJournal(value, validMarkdownSourcePath());
+        exportJournal(value, validMarkdownSourcePath()+validExportWorldPath());
     });
     ui.notifications.info("Export completed");
 }
@@ -188,8 +191,21 @@ async function startExport() {
 function validMarkdownSourcePath() {
     let validMarkdownSourcePath = markdownSourcePath.replace("\\", "/");
     validMarkdownSourcePath += validMarkdownSourcePath.endsWith("/") ? "" : "/";
-    validMarkdownSourcePath += game.world.name + "/";
+//  validMarkdownSourcePath += game.world.name + "/";
     return validMarkdownSourcePath;
+}
+
+
+function validImportWorldPath() {
+    let validImportWorldPath = importWorldPath == "" ? (game.world.name + "/") : importWorldPath;
+    validImportWorldPath += validImportWorldPath.endsWith("/") ? "" : "/";
+    return validImportWorldPath;
+}
+
+function validExportWorldPath() {
+    let validExportWorldPath = exportWorldPath == "" ? (game.world.name + "/") : exportWorldPath;
+    validExportWorldPath += validExportWorldPath.endsWith("/") ? "" : "/";
+    return validExportWorldPath;
 }
 
 function generateJournalFileName(journalEntity) {
@@ -259,7 +275,7 @@ async function createJournalFolders(rootPath, parentFolderId) {
 
 async function importFile(file) {
     Logger.logTrace(`importFile | params(file = ${file})`);
-    var journalPath = decodeURIComponent(file).replace(validMarkdownSourcePath(), '').trim();
+    var journalPath = decodeURIComponent(file).replace(validMarkdownSourcePath()+validImportWorldPath(), '').trim();
     var journalId = getJournalIdFromFilename(journalPath).trim();
     var journalName = getJournalTitleFromFilename(last(journalPath.split('/'))).trim();
     var parentPath = journalPath.replace(last(journalPath.split('/')), '').trim();
