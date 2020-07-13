@@ -1,15 +1,45 @@
 "use strict";
 import * as Constants from "./constants.js"
 import * as Logger from './logger.js'
-import * as FS from './journalFileSystem.js'
 
-let markdownSourcePath, journalEditorLink, importWorldPath, exportWorldPath;
+let markdownPathOptions, markdownSourcePath, journalEditorLink, importWorldPath, exportWorldPath;
 let enableTracing = false;
 let newImportedFiles = "";
 let skippedJournalFolders, skippedJournalEntries;
 
+// parses the string back to something the FilePicker can understand as an option
+export function parse(str) {
+  let matches = str.match(/\[(.+)\]\s*(.+)/);
+  if (matches) {
+    let source = matches[1];
+    const current = matches[2].trim();
+    const [s3, bucket] = source.split(":");
+    if (bucket !== undefined) {
+      return {
+        activeSource: s3,
+        bucket: bucket,
+        current: current,
+      };
+    } else {
+      return {
+        activeSource: s3,
+        bucket: null,
+        current: current,
+      };
+    }
+  }
+  // failsave, try it at least
+  return {
+    activeSource: "data",
+    bucket: null,
+    current: str,
+  };
+}
+
 export async function fetchParams(silent = false) {
-    markdownSourcePath = game.settings.get(Constants.MODULE_NAME, "MarkdownSourcePath");
+    markdownPathOptions = parse(game.settings.get(Constants.MODULE_NAME, "MarkdownSourcePath"));
+    markdownSourcePath = markdownPathOptions.current;
+
     journalEditorLink = game.settings.get(Constants.MODULE_NAME, "JournalEditorLink");
     enableTracing = game.settings.get(Constants.MODULE_NAME, "EnableTracing");
     
@@ -56,7 +86,7 @@ export async function readyModule() {
     let buildPath = '';
     validMarkdownSourcePath().split('/').forEach((path) => {
         buildPath += path + '/';
-        FS.createDirectory("data", buildPath)
+        FilePicker.createDirectory(markdownPathOptions.activeSource, buildPath)
             .then((result) => {
                 Logger.log(`Creating ${buildPath}`);
             })
@@ -81,8 +111,8 @@ export async function readyModule() {
                 break;
 
             case "test": // /js test
-                FS.browse("data", validMarkdownSourcePath()).then((result) => {
-                    // ChatMessage.create({content: JSON.stringify(result)});
+                FilePicker.browse(markdownPathOptions.activeSource, "/").then((result) => {
+                     ChatMessage.create({content: JSON.stringify(result)});
                 });
 
                 console.log(game.journal);
@@ -154,7 +184,7 @@ export async function readyModule() {
 
 async function startImport() {
     await createJournalFolders(validMarkdownSourcePath()+validImportWorldPath(), null);
-    let result = await FS.browse("data", validMarkdownSourcePath()+validImportWorldPath());
+    let result = await FilePicker.browse(markdownPathOptions.activeSource, validMarkdownSourcePath()+validImportWorldPath());
     for (let [key, file] of Object.entries(result.files)) {
         await importFile(file);
     }
@@ -163,7 +193,7 @@ async function startImport() {
     }
 
     ui.notifications.info("Import completed");
-    // FS.browse("data", validMarkdownSourcePath()).then((result) => {
+    // FilePicker.browse(markdownPathOptions.activeSource, validMarkdownSourcePath()).then((result) => {
     //     console.log(result);
     //     result.files.forEach(file => {
     //         importFile(file);
@@ -241,7 +271,7 @@ function hasJsonStructure(str) {
 
 async function importFolder(importFolderPath) {
     Logger.logTrace(`Importing folder: ${importFolderPath}`);
-    let result = await FS.browse("data", importFolderPath);
+    let result = await FilePicker.browse(markdownPathOptions.activeSource, importFolderPath);
 
     for (let [key, file] of Object.entries(result.files)) {
         await importFile(file);
@@ -255,7 +285,7 @@ async function importFolder(importFolderPath) {
 // This will create the journal folder in FVTT
 async function createJournalFolders(rootPath, parentFolderId) {
     Logger.logTrace(`createJournalFolders | Params(folder = ${rootPath} parent = ${parentFolderId})`)
-    let result = await FS.browse("data", rootPath)
+    let result = await FilePicker.browse(markdownPathOptions.activeSource, rootPath)
     for (let [key, folder] of Object.entries(result.dirs)) {
         let thisFolderName = last(decodeURIComponent(folder).split('/'));
         let folderDetails = game.folders.filter(f => (f.data.type === "JournalEntry") && (f.data.name === thisFolderName) && (f.data.parent === parentFolderId));
@@ -336,7 +366,7 @@ async function exportFolder(folder, parentPath) {
     let folderPath = (parentPath + '/' + folder.data.name).replace("//", "/").trim();
 
     // Create folder directory on server. 
-    FS.createDirectory("data", folderPath)
+    FilePicker.createDirectory(markdownPathOptions.activeSource, folderPath)
         .then((result) => {
             Logger.log(`Creating ${folderPath}`);
             folder.content.forEach(journalEntry => {
@@ -380,7 +410,7 @@ async function exportJournal(journalEntry, parentPath) {
         md = converter.makeMarkdown(journalEntry.data.content).split('\r\n');
     }
 
-    FS.upload("data", parentPath, new File(md, journalFileName), { bucket: null })
+    FilePicker.upload(markdownPathOptions.activeSource, parentPath, new File(md, journalFileName), { bucket: null })
         .then((result) => {
             Logger.log(`Uploading ${parentPath}/${journalFileName}`);
         })
