@@ -306,6 +306,11 @@ async function createJournalFolders(rootPath, parentFolderId) {
 async function importFile(file) {
     Logger.logTrace(`importFile | params(file = ${file})`);
     var journalPath = decodeURIComponent(file).replace(validMarkdownSourcePath()+validImportWorldPath(), '').trim();
+    var pathUrl = (journalPath.startsWith('https://') ? new URL(journalPath) : '')
+    if(pathUrl) {
+        var tempPathArray = pathUrl.pathname.split("/");
+        journalPath = tempPathArray.slice(2).join("/").replace(/\%20/gi," ");
+    }
     var journalId = getJournalIdFromFilename(journalPath).trim();
     var journalName = getJournalTitleFromFilename(last(journalPath.split('/'))).trim();
     var parentPath = journalPath.replace(last(journalPath.split('/')), '').trim();
@@ -331,7 +336,8 @@ async function importFile(file) {
 
     Logger.logTrace(`'${file}','${journalPath}','${journalId}','${journalName}','${parentPath}','${currentParent}'`);
 
-    fetch('/' + file).then(response => {
+    if(!pathUrl) file = '/' + file;
+    fetch(file).then(response => {
         response.text().then(journalContents => {
             let updated = false;
             let md = "";
