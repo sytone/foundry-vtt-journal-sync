@@ -3,7 +3,7 @@
   "title": "Journal Sync",
   "description": "This module allows you to sync your journal entries with markdown files to give you more flexibility in editing your notes.",
   "author": "Sytone",
-  "version": "0.5.0-km",
+  "version": "0.5.0",
   "minimumCoreVersion": "0.6.0",
   "compatibleCoreVersion":"0.6.5",
   "languages": [
