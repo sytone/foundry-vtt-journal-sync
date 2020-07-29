@@ -372,6 +372,7 @@ async function exportFolder(folder, parentPath) {
     let folderPath = (parentPath + '/' + folder.data.name).replace("//", "/").trim();
 
     // Create folder directory on server. 
+    await FilePicker.createDirectory(markdownPathOptions.activeSource, parentPath);
     FilePicker.createDirectory(markdownPathOptions.activeSource, folderPath)
         .then((result) => {
             Logger.log(`Creating ${folderPath}`);
