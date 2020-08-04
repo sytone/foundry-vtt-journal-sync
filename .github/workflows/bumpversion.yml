@@ -1,21 +1,32 @@
 name: journal-sync CI
 
-on: [push]
+on:
+  push:
+    # Sequence of patterns matched against refs/tags
+    tags:
+      - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
+
+    - name: Get version
+      id: get_version
+      run: echo ::set-output name=VERSION::${GITHUB_REF#refs/*/}    
+    
+    # Create a zip file with all files required by the module to add to the release
+    - run: zip -r ./${{ steps.get_version.outputs.VERSION }}.zip module.json main.js lang/ module/ scripts/
     
     # Create a zip file with all files required by the module to add to the release
     - run: zip -r ./journal-sync.zip module.json main.js lang/ module/ scripts/
-    
+
     # Run the script that returns the version from `module.json`
-    - name: Get Version                                   
-      shell: bash
-      id: get-version
-      run: echo "::set-output name=version::$(node ./.github/workflows/get-version.js)"    
+    # - name: Get Version                                   
+    #   shell: bash
+    #   id: get-version
+    #   run: echo "::set-output name=version::$(node ./.github/workflows/get-version.js)"    
     
     # Create an additional release for this version
     - name: Create Release                                
@@ -23,13 +34,13 @@ jobs:
       uses: ncipollo/release-action@v1
       with:
         allowUpdates: true
-        name: Release ${{ steps.get-version.outputs.version }} # Use the version in the name
+        name: Release ${{ github.ref }} # Use the version in the name
         draft: false
         prerelease: false
         token: ${{ secrets.GITHUB_TOKEN }}
-        artifacts: './CHANGELOG.md,./module.json,./journal-sync.zip'
-        tag: ${{ steps.get-version.outputs.version }} # Use the version as the tag
-    
+        artifacts: './README.md,./CHANGELOG.md,./module.json,./${{ steps.get_version.outputs.VERSION }}.zip'
+        tag: ${{ github.ref }} # Use the version as the tag
+
     # Update the 'latest' release
     - name: Create Release
       id: create_latest_release
@@ -41,5 +52,5 @@ jobs:
         draft: false
         prerelease: false
         token: ${{ secrets.GITHUB_TOKEN }}
-        artifacts: './CHANGELOG.md,./module.json,./journal-sync.zip'
-        tag: latest
+        artifacts: './README.md,./CHANGELOG.md,./module.json,./journal-sync.zip'
+        tag: ${{ github.ref }}

@@ -153,7 +153,9 @@ async function startImport() {
     await createJournalFolders(validMarkdownSourcePath(), null);
     let result = await FS.browse("data", validMarkdownSourcePath());
     for (let [key, file] of Object.entries(result.files)) {
-        await importFile(file);
+        if(isValidFile(file)) {
+            await importFile(file);
+        }
     }
     for (let [key, folder] of Object.entries(result.dirs)) {
         await importFolder(folder);
@@ -192,6 +194,10 @@ function validMarkdownSourcePath() {
     return validMarkdownSourcePath;
 }
 
+function isValidFile(filename) {
+    return filename.endsWith('.md');
+}
+
 function generateJournalFileName(journalEntity) {
     return `${journalEntity.name} (${journalEntity.id}).md`
 }
@@ -203,7 +209,8 @@ function getJournalIdFromFilename(fileName) {
 
 function getJournalTitleFromFilename(fileName) {
     // 'sdfkjs dflksjd kljf skldjf(IDIDIDIID).md
-    return fileName.replace(`(${getJournalIdFromFilename(fileName)}).md`, '');
+    // Remove the ID if i is there and any .md remaining so it is just the file name with no extension.
+    return fileName.replace(`(${getJournalIdFromFilename(fileName)}).md`, '').replace('.md', '');
 }
 
 function last(array) {
@@ -228,7 +235,9 @@ async function importFolder(importFolderPath) {
     let result = await FS.browse("data", importFolderPath);
 
     for (let [key, file] of Object.entries(result.files)) {
-        await importFile(file);
+        if(isValidFile(file)) {
+            await importFile(file);
+        }
     }
 
     for (let [key, folder] of Object.entries(result.dirs)) {
@@ -306,7 +315,7 @@ async function importFile(file) {
             });
 
             if (!updated) {
-                Logger.log(`Creating ${journalPath} with ID ${journalId} named ${journalName}`);
+                Logger.log(`Creating ${journalPath} named ${journalName}`);
                 JournalEntry.create({ name: journalName, content: md, folder: currentParent }).then(journal => { journal.show(); });
                 ChatMessage.create({ content: `Added ${journalName}, please run export and delete '${journalName}.md'` });
             }

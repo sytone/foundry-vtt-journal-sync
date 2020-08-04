@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.0] - 2020-08-04
+
+- Fixed: On import files other than markdown files would be imported.
+- Fixed: Issues on Forge for export due to the data folder #2
+- Fixed: .md was added to the Journal Entry name in foundry.
+- Changed: Switched to release on version tag.
+
 ## [0.5.0] - 2020-07-10
 
 - Added: When import / export detects that the content is JSON Markdown / HTML conversion is skipped.
@@ -45,7 +52,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added: Created simple module to import and export Journal Entries to the file system and used Markdown as the format.
 - Added: Created import and export commands for chat window.
 
-[Unreleased]: https://github.com/sytone/foundry-vtt-journal-sync/releases/tag/0.5.0...HEAD
+[Unreleased]: https://github.com/sytone/foundry-vtt-journal-sync/releases/tag/0.6.0...HEAD
+[0.6.0]: https://github.com/sytone/foundry-vtt-journal-sync/compare/0.5.0...0.6.0
 [0.5.0]: https://github.com/sytone/foundry-vtt-journal-sync/compare/0.4.1...0.5.0
 [0.4.1]: https://github.com/sytone/foundry-vtt-journal-sync/compare/0.4.0...0.4.1
 [0.4.0]: https://github.com/sytone/foundry-vtt-journal-sync/compare/0.3.0...0.4.0
