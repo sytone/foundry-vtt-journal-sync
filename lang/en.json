@@ -1,8 +1,11 @@
 {
     "journal-sync.Settings.Title": "Journal Sync settings",
-    
     "journal-sync.MarkdownSourcePath.Name": "Markdown Source Path",
     "journal-sync.MarkdownSourcePath.Hint": "The path to the markdown files under the Foundry Data folder, it is 'journal-sync' by default",
+    "journal-sync.ImportWorldPath.Name": "[Advanced] Import World Path",
+    "journal-sync.ImportWorldPath.Hint": "The world path relative to the Markdown Source Path to import from. Defaults to game name.",
+    "journal-sync.ExportWorldPath.Name": "[Advanced] Export World Path",
+    "journal-sync.ExportWorldPath.Hint": "The world path relative to the Markdown Source Path to export to. Defaults to game name.",
     "journal-sync.JournalEditorLink.Name": "Journal Editor Link",
     "journal-sync.JournalEditorLink.Hint": "Link to the editor you use to update the Journal Markdown. For example a hosted VSCode instance",
     "journal-sync.EnableTracing.Name": "Enable Tracing",

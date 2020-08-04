@@ -66,8 +66,21 @@ const settings = [
     default: "",
     type: String,
     onChange: fetchParams
-  }
-  
+  },
+  {
+    name: "ImportWorldPath",
+    scope: "world",
+    default: "",
+    type: String,
+    onChange: fetchParams
+  },
+  {
+    name: "ExportWorldPath",
+    scope: "world",
+    default: "",
+    type: String,
+    onChange: fetchParams
+  },  
 ]
 
 export async function registerSettings() {
