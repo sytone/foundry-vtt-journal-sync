@@ -34,3 +34,11 @@ docker exec -it foundry-journal-editor cat '/home/coder/.config/code-server/conf
 ```
 
 In settings you can add a link to the code-server instance and it will add a button below the import and export buttons. If you have the standard setup and used the commands above adding `http://<address or IP of machine running code-server>:8282/?folder=/home/coder/project` as the Journal Editor Link value will allow you to edit the Journal entries in the browser by clicking on the link.
+
+## Release Process
+
+Once all commits are created do the following.
+
+1. Update module.json to change the version.
+2. Tag the head `git tag v0.6.0 -m "Release v0.6.0" -e`
+3. push the tag `git push origin v0.6.0`

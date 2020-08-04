@@ -34,7 +34,7 @@ jobs:
       uses: ncipollo/release-action@v1
       with:
         allowUpdates: true
-        name: Release ${{ github.ref }} # Use the version in the name
+        name: Release ${{ steps.get_version.outputs.VERSION }} # Use the version in the name
         draft: false
         prerelease: false
         token: ${{ secrets.GITHUB_TOKEN }}
@@ -45,7 +45,7 @@ jobs:
     - name: Create Release
       id: create_latest_release
       uses: ncipollo/release-action@v1
-      if: endsWith(github.ref, 'master') # Only update the latest release when pushing to the master branch
+      # if: endsWith(github.ref, 'master') # Only update the latest release when pushing to the master branch
       with:
         allowUpdates: true
         name: Latest
