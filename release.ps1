@@ -9,8 +9,8 @@ $moduleManifest.changelog = "https://github.com/sytone/foundry-vtt-journal-sync/
 
 $moduleManifest | ConvertTo-Json | Set-Content .\module.json
 git add .
-git commit -m "Updating release version to: $($moduleManifest.version)"
-Write-Host "Tagging head with $($moduleManifest.version)"
-git tag $moduleManifest.version -m "Release $($moduleManifest.version)" -e
+git commit -m "Updating release version to: v$($moduleManifest.version)"
+Write-Host "Tagging head with v$($moduleManifest.version)"
+git tag "v$($moduleManifest.version)" -m "Release v$($moduleManifest.version)" -e
 Write-Host "Pushing tag for build"
-git push origin $moduleManifest.version
+git push origin "v$($moduleManifest.version)"
