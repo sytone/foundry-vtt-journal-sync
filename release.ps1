@@ -11,6 +11,6 @@ $moduleManifest | ConvertTo-Json | Set-Content .\module.json
 git add .
 git commit -m "Updating release version to: $($moduleManifest.version)"
 Write-Host "Tagging head with $($moduleManifest.version)"
-git tag $moduleManifest.version -m "Release $moduleManifest.version" -e
+git tag $moduleManifest.version -m "Release $($moduleManifest.version)" -e
 Write-Host "Pushing tag for build"
 git push origin $moduleManifest.version
