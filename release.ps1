@@ -21,6 +21,7 @@ while (-not $released) {
     (Invoke-WebRequest $moduleManifest.manifest).Content | Set-Content "$env:TMP\module.temp.json" -NoNewLine -Force
     if ((Get-Content .\module.json -Raw).Replace("`r`n", "`n") -eq (Get-Content "$env:TMP\module.temp.json" -Raw)) {
         Write-Host "Release completed, validating."
+        $released = $true
     } 
     else { 
         Write-Host "." -NoNewline
