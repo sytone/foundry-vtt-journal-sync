@@ -42,3 +42,7 @@ Once all commits are created do the following.
 1. Update module.json to change the version.
 2. Tag the head `git tag v0.6.0 -m "Release v0.6.0" -e`
 3. push the tag `git push origin v0.6.0`
+
+``` pwsh
+$tag="v0.6.1";git tag $tag -m "Release $tag" -e;git push origin $tag
+```

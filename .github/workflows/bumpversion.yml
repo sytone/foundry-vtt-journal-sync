@@ -39,7 +39,7 @@ jobs:
         prerelease: false
         token: ${{ secrets.GITHUB_TOKEN }}
         artifacts: './README.md,./CHANGELOG.md,./module.json,./${{ steps.get_version.outputs.VERSION }}.zip'
-        tag: ${{ github.ref }} # Use the version as the tag
+        tag: ${{ steps.get_version.outputs.VERSION }} # Use the version as the tag
 
     # Update the 'latest' release
     - name: Create Release
@@ -53,4 +53,4 @@ jobs:
         prerelease: false
         token: ${{ secrets.GITHUB_TOKEN }}
         artifacts: './README.md,./CHANGELOG.md,./module.json,./journal-sync.zip'
-        tag: ${{ github.ref }}
+        tag: ${{ steps.get_version.outputs.VERSION }}
