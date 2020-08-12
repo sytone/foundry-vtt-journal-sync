@@ -3,7 +3,7 @@
   "title": "Journal Sync",
   "description": "This module allows you to sync your journal entries with markdown files to give you more flexibility in editing your notes.",
   "author": "Sytone",
-  "version": "0.6.11",
+  "version": "0.6.12",
   "minimumCoreVersion": "0.6.0",
   "compatibleCoreVersion": "0.6.5",
   "languages": [
@@ -22,10 +22,10 @@
   "styles": [],
   "packs": [],
   "url": "https://github.com/sytone/foundry-vtt-journal-sync",
-  "manifest": "https://github.com/sytone/foundry-vtt-journal-sync/releases/download/v0.6.11/module.json",
-  "download": "https://github.com/sytone/foundry-vtt-journal-sync/releases/download/v0.6.11/v0.6.11.zip",
-  "readme": "https://github.com/sytone/foundry-vtt-journal-sync/releases/download/v0.6.11/README.md",
-  "changelog": "https://github.com/sytone/foundry-vtt-journal-sync/releases/download/v0.6.11/CHANGELOG.md",
+  "manifest": "https://raw.githubusercontent.com/sytone/foundry-vtt-journal-sync/master/module.json",
+  "download": "https://github.com/sytone/foundry-vtt-journal-sync/releases/download/v0.6.12/v0.6.12.zip",
+  "readme": "https://github.com/sytone/foundry-vtt-journal-sync/releases/download/v0.6.12/README.md",
+  "changelog": "https://github.com/sytone/foundry-vtt-journal-sync/releases/download/v0.6.12/CHANGELOG.md",
   "bugs": "https://github.com/sytone/foundry-vtt-journal-sync/issues",
   "socket": true
 }
