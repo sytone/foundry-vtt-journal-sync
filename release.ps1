@@ -18,7 +18,10 @@ git push
 
 $released = $false
 while (-not $released) {
-    (Invoke-WebRequest "https://github.com/sytone/foundry-vtt-journal-sync/releases/download/v$($moduleManifest.version)/module.json" -SkipHttpErrorCheck).Content | Set-Content "$env:TMP\module.temp.json" -NoNewLine -Force
+    Write-Host "Pulling https://github.com/sytone/foundry-vtt-journal-sync/releases/download/v$($moduleManifest.version)/module.json"
+    $bytes = (Invoke-WebRequest "https://github.com/sytone/foundry-vtt-journal-sync/releases/download/v$($moduleManifest.version)/module.json" -SkipHttpErrorCheck).Content
+
+    [System.Text.Encoding]::ASCII.GetString($bytes) | Set-Content "$env:TMP\module.temp.json" -NoNewLine -Force
     if ((Get-Content .\module.json -Raw).Replace("`r`n", "`n") -eq (Get-Content "$env:TMP\module.temp.json" -Raw)) {
         Write-Host "Release completed, validating."
         $released = $true
@@ -38,19 +41,19 @@ if((Invoke-WebRequest "https://github.com/sytone/foundry-vtt-journal-sync/releas
 }
 
 if((Invoke-WebRequest $moduleManifest.download -SkipHttpErrorCheck).StatusCode -eq 200) {
-    Write-Host "download valid."
+    Write-Host "ZIP Download valid."
 } else {
-    Write-Host "Issue with download." -ForegroundColor Red
+    Write-Host "Issue with ZIP Download." -ForegroundColor Red
 }
 
 if((Invoke-WebRequest $moduleManifest.readme -SkipHttpErrorCheck).StatusCode -eq 200) {
-    Write-Host "readme valid."
+    Write-Host "README.md valid."
 } else {
-    Write-Host "Issue with readme." -ForegroundColor Red
+    Write-Host "Issue with README.md." -ForegroundColor Red
 }
 
 if((Invoke-WebRequest $moduleManifest.changelog -SkipHttpErrorCheck).StatusCode -eq 200) {
-    Write-Host "changelog valid."
+    Write-Host "CHANGELOG.md valid."
 } else {
-    Write-Host "Issue with changelog." -ForegroundColor Red
+    Write-Host "Issue with CHANGELOG.md." -ForegroundColor Red
 }
