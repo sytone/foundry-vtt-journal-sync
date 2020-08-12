@@ -3,6 +3,7 @@ Write-Host "Current Version: $($moduleManifest.version)"
 $newVersion = Read-Host -Prompt "Enter Release Version"
 
 $moduleManifest.version = $newVersion
+$moduleManifest.manifest = "https://github.com/sytone/foundry-vtt-journal-sync/releases/download/v$newVersion/module.json"
 $moduleManifest.download = "https://github.com/sytone/foundry-vtt-journal-sync/releases/download/v$newVersion/v$newVersion.zip"
 $moduleManifest.readme = "https://github.com/sytone/foundry-vtt-journal-sync/releases/download/v$newVersion/README.md"
 $moduleManifest.changelog = "https://github.com/sytone/foundry-vtt-journal-sync/releases/download/v$newVersion/CHANGELOG.md"
