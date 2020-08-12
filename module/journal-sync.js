@@ -243,6 +243,11 @@ function isValidFile(filename) {
     return filename.endsWith('.md');
 }
 
+function isValidFileName(filename) {
+    var re = /^(?!\.)(?!com[0-9]$)(?!con$)(?!lpt[0-9]$)(?!nul$)(?!prn$)[^\|\*\?\\:<>/$"]*[^\.\|\*\?\\:<>/$"]+$/
+    return re.test(filename);
+}
+
 function generateJournalFileName(journalEntity) {
     return `${journalEntity.name} (${journalEntity.id}).md`
 }
@@ -261,7 +266,6 @@ function getJournalTitleFromFilename(fileName) {
 function last(array) {
     return array[array.length - 1];
 }
-
 
 function hasJsonStructure(str) {
     if (typeof str !== 'string') return false;
@@ -380,7 +384,20 @@ async function exportFolder(folder, parentPath) {
     let folderPath = (parentPath + '/' + folder.data.name).replace("//", "/").trim();
 
     // Create folder directory on server. 
-    await FilePicker.createDirectory(markdownPathOptions.activeSource, parentPath);
+    // Try and create parent path before child, have to catch error 
+    // as no way to check for folder existance that I saw.
+    FilePicker.createDirectory(markdownPathOptions.activeSource, parentPath)
+        .then((result) => {
+            Logger.log(`Creating ${parentPath}`);
+        })
+        .catch((error) => {
+            if (!error.includes("EEXIST")) {
+                Logger.log(error);
+            } else {
+                Logger.log(`${parentPath} exists`);
+            }
+        });
+
     FilePicker.createDirectory(markdownPathOptions.activeSource, folderPath)
         .then((result) => {
             Logger.log(`Creating ${folderPath}`);
@@ -411,6 +428,11 @@ async function exportJournal(journalEntry, parentPath) {
         Logger.log(`Skipping ${journalEntry.name} as it matches exclusion rules`)
         return;
     }
+
+    if(!isValidFileName(journalEntry.name)) {
+        ChatMessage.create({ content: `Unable to export:<br /> <strong>${parentPath}/${journalEntry.name}</strong><br />It has invalid character(s) in its name that can not be used in file names.<br /><br /> These characters are invalid: <pre>| * ? \ : < > $</pre><br />Please rename the Journal Entry and export again.` });
+    }
+    
 
     let md = "";
     let journalFileName = generateJournalFileName(journalEntry);

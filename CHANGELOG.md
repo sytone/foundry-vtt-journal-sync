@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.11] - 2020-08-11
+
+- Fixed: Error when making parent path not caught and stopping export of files.
+- Fixed: Issue where export fails after first run.
+- Fixed: Issues with filenames and invalid characters int he Journal entry names.
+
 ## [0.6.10] - 2020-08-11
 
 - Fixed: Versions in the Mainfest files.
@@ -58,7 +64,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added: Created simple module to import and export Journal Entries to the file system and used Markdown as the format.
 - Added: Created import and export commands for chat window.
 
-[Unreleased]: https://github.com/sytone/foundry-vtt-journal-sync/releases/tag/v0.6.10...HEAD
+[Unreleased]: https://github.com/sytone/foundry-vtt-journal-sync/releases/tag/v0.6.11...HEAD
+[0.6.11]: https://github.com/sytone/foundry-vtt-journal-sync/compare/v0.6.10...v0.6.11
 [0.6.10]: https://github.com/sytone/foundry-vtt-journal-sync/compare/v0.6.0...v0.6.10
 [0.6.0]: https://github.com/sytone/foundry-vtt-journal-sync/compare/0.5.0...v0.6.0
 [0.5.0]: https://github.com/sytone/foundry-vtt-journal-sync/compare/0.4.1...0.5.0
