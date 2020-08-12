@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.6.10] - 2020-08-04
+## [0.6.10] - 2020-08-11
 
 - Fixed: Versions in the Mainfest files.
 - Added: Script to handle the release automatically.
