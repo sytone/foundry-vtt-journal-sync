@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.10] - 2020-08-04
+
+- Fixed: Versions in the Mainfest files.
+- Added: Script to handle the release automatically.
+- Fixed: The Build to only run on a tagged release not every release.
+
 ## [0.6.0] - 2020-08-04
 
 - Fixed: On import files other than markdown files would be imported.
@@ -52,8 +58,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added: Created simple module to import and export Journal Entries to the file system and used Markdown as the format.
 - Added: Created import and export commands for chat window.
 
-[Unreleased]: https://github.com/sytone/foundry-vtt-journal-sync/releases/tag/0.6.0...HEAD
-[0.6.0]: https://github.com/sytone/foundry-vtt-journal-sync/compare/0.5.0...0.6.0
+[Unreleased]: https://github.com/sytone/foundry-vtt-journal-sync/releases/tag/v0.6.10...HEAD
+[0.6.10]: https://github.com/sytone/foundry-vtt-journal-sync/compare/v0.6.0...v0.6.10
+[0.6.0]: https://github.com/sytone/foundry-vtt-journal-sync/compare/0.5.0...v0.6.0
 [0.5.0]: https://github.com/sytone/foundry-vtt-journal-sync/compare/0.4.1...0.5.0
 [0.4.1]: https://github.com/sytone/foundry-vtt-journal-sync/compare/0.4.0...0.4.1
 [0.4.0]: https://github.com/sytone/foundry-vtt-journal-sync/compare/0.3.0...0.4.0
