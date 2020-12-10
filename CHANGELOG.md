@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.0] - 2020-08-11
+
+Note: This is a breaking change and only works on 0.7.8 or later of Foundry VTT
+
+- Fixed: Error uploading files to server. [https://gitlab.com/foundrynet/foundryvtt/-/issues/4221](https://gitlab.com/foundrynet/foundryvtt/-/issues/4221)
+
 ## [0.6.11] - 2020-08-11
 
 - Fixed: Error when making parent path not caught and stopping export of files.
