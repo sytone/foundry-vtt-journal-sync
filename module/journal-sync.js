@@ -447,7 +447,10 @@ async function exportJournal(journalEntry, parentPath) {
         md = converter.makeMarkdown(journalEntry.data.content).split('\r\n');
     }
 
-    FilePicker.upload(markdownPathOptions.activeSource, parentPath, new File(md, journalFileName), { bucket: null })
+    let blob = new Blob([md], {type: "text/markdown"});
+    let file = new File([blob], journalFileName, {type: "text/markdown"});
+
+    FilePicker.upload(markdownPathOptions.activeSource, parentPath, file, { bucket: null })
         .then((result) => {
             Logger.log(`Uploading ${parentPath}/${journalFileName}`);
         })
