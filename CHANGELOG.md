@@ -70,7 +70,8 @@ Note: This is a breaking change and only works on 0.7.8 or later of Foundry VTT
 - Added: Created simple module to import and export Journal Entries to the file system and used Markdown as the format.
 - Added: Created import and export commands for chat window.
 
-[Unreleased]: https://github.com/sytone/foundry-vtt-journal-sync/releases/tag/v0.6.11...HEAD
+[Unreleased]: https://github.com/sytone/foundry-vtt-journal-sync/releases/tag/v1.0.0...HEAD
+[1.0.0]: https://github.com/sytone/foundry-vtt-journal-sync/compare/v0.6.11...v1.0.0
 [0.6.11]: https://github.com/sytone/foundry-vtt-journal-sync/compare/v0.6.10...v0.6.11
 [0.6.10]: https://github.com/sytone/foundry-vtt-journal-sync/compare/v0.6.0...v0.6.10
 [0.6.0]: https://github.com/sytone/foundry-vtt-journal-sync/compare/0.5.0...v0.6.0
