@@ -223,13 +223,13 @@ function validMarkdownSourcePath() {
 }
 
 function validImportWorldPath() {
-    let validImportWorldPath = importWorldPath == "" ? (game.world.name + "/") : importWorldPath;
+    let validImportWorldPath = importWorldPath == "" ? (game.world.data.name + "/") : importWorldPath;
     validImportWorldPath += validImportWorldPath.endsWith("/") ? "" : "/";
     return validImportWorldPath;
 }
 
 function validExportWorldPath() {
-    let validExportWorldPath = exportWorldPath == "" ? (game.world.name + "/") : exportWorldPath;
+    let validExportWorldPath = exportWorldPath == "" ? (game.world.data.name + "/") : exportWorldPath;
     validExportWorldPath += validExportWorldPath.endsWith("/") ? "" : "/";
     return validExportWorldPath;
 }
