@@ -42,7 +42,7 @@ export async function fetchParams(silent = false) {
 
     journalEditorLink = game.settings.get(Constants.MODULE_NAME, "JournalEditorLink");
     enableTracing = game.settings.get(Constants.MODULE_NAME, "EnableTracing");
-    
+
     importWorldPath = game.settings.get(Constants.MODULE_NAME, "ImportWorldPath");
     exportWorldPath = game.settings.get(Constants.MODULE_NAME, "ExportWorldPath");
 
@@ -50,7 +50,7 @@ export async function fetchParams(silent = false) {
     skippedJournalEntries = game.settings.get(Constants.MODULE_NAME, "SkipJournalEntries").split(',');
 
     // If the entries are empty it will set the array to one empty string ""
-    // This matches the root path where the folder name is also 
+    // This matches the root path where the folder name is also
     // "" so blocked export/import. If nothing set put a name in that no
     // one in their right mind would use :)
     if(skippedJournalFolders.length == 1 && skippedJournalFolders[0] === "") {
@@ -108,7 +108,6 @@ export async function readyModule() {
             case "help":
                 data.content = "HERE IS HELP!";
                 return true;
-                break;
 
             case "test": // /js test
                 FilePicker.browse(markdownPathOptions.activeSource, "/").then((result) => {
@@ -120,17 +119,14 @@ export async function readyModule() {
                     Logger.log(`m[${key}] = ${value.data.name} - ${value.data.folder} - ${value.data.content}`);
                 });
                 return false;
-                break;
 
             case "export": // /js export
                 await startExport();
                 return false;
-                break;
 
             case "import": // /js import
                 await startImport();
                 return false;
-                break;
 
             case "nukejournals":
                 game.journal.forEach((value, key, map) => { JournalEntry.delete(value.id); });
@@ -143,7 +139,6 @@ export async function readyModule() {
             default:
                 data.content = "HERE IS HELP!";
                 return true;
-                break;
         }
     });
 
@@ -354,7 +349,7 @@ async function importFile(file) {
             let updated = false;
             let md = "";
 
-            // If the contents is pure JSON ignore it as it may be used by 
+            // If the contents is pure JSON ignore it as it may be used by
             // a module as configuration storage.
             if (hasJsonStructure(journalContents)) {
                 md = journalContents
@@ -383,8 +378,8 @@ async function importFile(file) {
 async function exportFolder(folder, parentPath) {
     let folderPath = (parentPath + '/' + folder.data.name).replace("//", "/").trim();
 
-    // Create folder directory on server. 
-    // Try and create parent path before child, have to catch error 
+    // Create folder directory on server.
+    // Try and create parent path before child, have to catch error
     // as no way to check for folder existance that I saw.
     FilePicker.createDirectory(markdownPathOptions.activeSource, parentPath)
         .then((result) => {
@@ -416,8 +411,7 @@ async function exportFolder(folder, parentPath) {
             }
         });
 
-
-    // Recurse for any sub folders. 
+    // Recurse for any sub folders.
     folder.children.forEach(folderEntity => {
         exportFolder(folderEntity, folderPath);
     });
@@ -432,12 +426,11 @@ async function exportJournal(journalEntry, parentPath) {
     if(!isValidFileName(journalEntry.name)) {
         ChatMessage.create({ content: `Unable to export:<br /> <strong>${parentPath}/${journalEntry.name}</strong><br />It has invalid character(s) in its name that can not be used in file names.<br /><br /> These characters are invalid: <pre>| * ? \ : < > $</pre><br />Please rename the Journal Entry and export again.` });
     }
-    
 
     let md = "";
     let journalFileName = generateJournalFileName(journalEntry);
 
-    // If the contents is pure JSON ignore it as it may be used by 
+    // If the contents is pure JSON ignore it as it may be used by
     // a module as configuration storage.
     if (hasJsonStructure(journalEntry.data.content)) {
         Logger.log(`Detected JSON, skipping markdown conversion for '${journalFileName}' located at '${parentPath}'`);
