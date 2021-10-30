@@ -455,7 +455,7 @@ async function exportJournal(journalEntry, parentPath) {
 async function createFolderTree(dataset) {
     let hashTable = Object.create(null);
     let dataTree = [];
-    dataset.forEach(folderEntity => hashTable[folderEntity.id] = { ...folderEntity, childNodes: [] });
+    dataset.forEach(folderEntity => hashTable[folderEntity.id] = { ...folderEntity, data: folderEntity.data, childNodes: [] });
 
     dataset.forEach(folderEntity => {
         if (folderEntity.parent) {
