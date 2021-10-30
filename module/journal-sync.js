@@ -458,8 +458,8 @@ async function createFolderTree(dataset) {
     dataset.forEach(folderEntity => hashTable[folderEntity.id] = { ...folderEntity, data: folderEntity.data, childNodes: [] });
 
     dataset.forEach(folderEntity => {
-        if (folderEntity.parent) {
-            hashTable[folderEntity.parent.id].childNodes.push(hashTable[folderEntity.id]);
+        if (folderEntity.data.parent) {
+            hashTable[folderEntity.data.parent].childNodes.push(hashTable[folderEntity.id]);
         } else {
             dataTree.push(hashTable[folderEntity.id]);
         }
